@@ -1,0 +1,4 @@
+vkbottle
+requests
+pillow
+numpy

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vkbot
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vkbot
+  template:
+    metadata:
+      labels:
+        app: vkbot
+    spec:
+      terminationGracePeriodSeconds: 0
+      nodeSelector:
+        app: vkbot
+      containers:
+      - name: vkbot
+        image: cr.yandex/crpbhviu3kh3io6cv5n0/vkbot
+        imagePullPolicy: Always
