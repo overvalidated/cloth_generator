@@ -5,10 +5,11 @@ from abc import ABC
 import diffusers
 import numpy as np
 import torch
-from diffusers import StableDiffusionInpaintPipeline
-from diffusers import EulerAncestralDiscreteScheduler
+from diffusers import StableDiffusionInpaintPipeline, EulerAncestralDiscreteScheduler
 import requests
 from io import BytesIO
+
+# from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
 import PIL
 
@@ -65,6 +66,9 @@ class DiffusersHandler(BaseHandler, ABC):
 
         dtp = torch.float16 if torch.cuda.is_available() and properties.get("gpu_id") is not None else torch.float32
         self.pipe = StableDiffusionInpaintPipeline.from_pretrained(model_dir + "/model", torch_dtype=dtp)
+        # self.translator = MBartForConditionalGeneration.from_pretrained(model_dir + "/models/translate", torch_dtype=dtp).to(self.device)
+        # self.tokenizer = MBart50TokenizerFast.from_pretrained(model_dir + "/models/translate")
+        # self.tokenizer.src_lang = "ru_RU"
         self.pipe.to(self.device)
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(self.pipe.scheduler.config)
         logger.info("Diffusion model from path %s loaded successfully", model_dir)
@@ -104,6 +108,10 @@ class DiffusersHandler(BaseHandler, ABC):
         mask_image = download_image(mask_url).crop((x, y, x + 900, y + 900)).resize((width, height))
         num_samples = 4
 
+        # encoded_hi = self.tokenizer(inputs, return_tensors="pt").to(self.device)
+        # generated_tokens = self.translator.generate(**encoded_hi)
+        # inputs = self.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+
         inferences = self.pipe(
             prompt=inputs,
             image=image,
@@ -112,8 +120,9 @@ class DiffusersHandler(BaseHandler, ABC):
             mask_image=mask_image,
             num_inference_steps=20,
             eta=0.1,
-            guidance_scale=12.0,
+            guidance_scale=6.0,
             num_images_per_prompt=num_samples,
+            negative_prompt=['circles, humanoids, living creatures']
         ).images
 
         height, width = 512, 1024
@@ -133,15 +142,16 @@ class DiffusersHandler(BaseHandler, ABC):
             full_mask_image = PIL.Image.fromarray(full_mask_image)
 
             full_images = self.pipe(
-                prompt=inputs[0] + ', view from different side',
+                prompt=inputs[0] + ', another look',
                 image=full_image,
                 height=height,
                 width=width,
                 mask_image=full_mask_image,
                 num_inference_steps=20,
                 eta=0.0,
-                guidance_scale=12.0,
+                guidance_scale=2.0,
                 num_images_per_prompt=num_samples,
+            negative_prompt='circles, humanoids, living creatures'
             ).images
             full_images_list.append(full_images[0])
         inferences = [image_grid(full_images_list, 1, len(full_images_list))]
