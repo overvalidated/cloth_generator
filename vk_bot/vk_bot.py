@@ -18,7 +18,6 @@ from vkbottle import PhotoMessageUploader
 from vkbottle.bot import Bot, Message
 from vkbottle.modules import logger
 
-token = 'vk1.a.-CmRQZEar4Zei97N7woEz-MK7LqmHAcIEQ2myhJGm-1yIfvOR2ihsa2OeqiijGHSITlc05D0XydaHm8g5K6_Sr6E_j-Pw1RGWKhygqjiT-d_3rW8YhpDYKSm_5mDlfHuGS1l6L6jr1SvIAeApz5h6nKGzVAdMkArYURIIKpyYeJjaqDz4FonMGhQ6XYIldkk1aIW-8jD_SHxwQV4KJoDSQ'
 addr = 'http://model-service:8080/predictions/stable-diffusion'
 
 bot = Bot(token)
